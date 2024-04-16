@@ -1,0 +1,1 @@
+The repo contains the R files from Credit Risk Analytics: the R Companion, by H Scheule, D Rosch an B Baesens.
