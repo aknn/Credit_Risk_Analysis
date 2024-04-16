@@ -1,0 +1,21 @@
+---
+title: "Comments"
+author: "Anil Kumar"
+date: "2024-04-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Vectorization of f2
+The line f2v <- Vectorize(f2) vectorizes the function f2. In R, most functions are not inherently vectorized, meaning they are designed to operate on single values rather than vectors (arrays) of values. However, many operations in R are more efficient or easier to write if functions can operate on vectors.
+
+The Vectorize function in R takes a function that normally operates on single values and creates a new function that can handle vector inputs. It does this by essentially wrapping the original function in a loop that applies the function to each element of the vector.
+
+Usage of f2v
+After vectorization, you can pass vectors to f2v, and it will apply f2 to each element of the vector. For example:
+
+f2v(c(1, 2, 3))
+
