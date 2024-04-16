@@ -31,7 +31,8 @@ Cum_Frequency <- numeric()
 Cum_Percent   <- numeric()
 
 defaut_indicator <- unique(default_time)
-for(i in 1:2){
+print(length(defaut_indicator))
+for(i in 1:3){
   temp <- mortgage[mortgage$default_time == defaut_indicator[i],]
   Frequency[i] <- length(temp$default_time)
   Percent[i]   <- round(Frequency[i]/nrow(mortgage),4)  * 100               
