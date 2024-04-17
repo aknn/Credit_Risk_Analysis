@@ -19,3 +19,23 @@ After vectorization, you can pass vectors to f2v, and it will apply f2 to each e
 
 f2v(c(1, 2, 3))
 
+The loan-to-value ratio (LTV) is a critical financial metric used by lenders to assess the risk associated with granting a mortgage. It is calculated by dividing the loan amount by the appraised property value and is expressed as a percentage. Observing the cumulative distribution (cumulative frequency plot) of LTV ratios at the time of origination can provide several important insights into lending practices, borrower equity, and potential risk exposures. Here are some key inferences you can draw, especially noting the sharp change observed at an LTV of 80%:
+
+1. Prevalence of Certain LTV Thresholds
+Sharp Change at 80% LTV: A sharp change in the cumulative distribution at an LTV of 80% is significant. This threshold is typically where private mortgage insurance (PMI) requirements kick in for conventional loans. Lenders often require borrowers to purchase PMI if they put down less than 20% of the home's value, which corresponds to an LTV higher than 80%. This insurance protects the lender in case the borrower defaults on the loan.
+2. Risk Assessment and Loan Approval Criteria
+Below 80% LTV: Loans with an LTV below 80% are generally considered lower risk. Borrowers have put more equity into the property, reducing the likelihood of default and the potential loss to the lender if foreclosure occurs. You might observe a large number of loans clustered below this threshold, indicating conservative lending practices or a market with substantial borrower equity.
+Above 80% LTV: Loans above this level are riskier for lenders because they indicate less initial borrower equity and a higher need for debt to finance the purchase. The presence of PMI for these loans is a risk mitigation strategy for lenders.
+3. Market Trends and Borrower Behavior
+Distribution Shape and Market Conditions: The overall shape of the cumulative distribution can indicate broader market trends. For instance, a higher concentration of high-LTV loans might suggest a booming housing market where buyers are willing to take larger risks or where rising home prices push borrowers to stretch their financial limits.
+Economic Indicators: In some cases, the distribution of LTV ratios can reflect economic conditions. For example, in a robust economy, you might see more high-LTV loans as buyers feel confident in their financial futures.
+4. Regulatory and Policy Implications
+Impact of Regulations: The distribution can also reflect the impact of lending regulations and policies. For instance, changes in lending standards or qualification requirements might shift the LTV distribution over time.
+5. Predicting Future Defaults
+Default Risk: The LTV ratio at origination is a predictor of default risk. Higher LTV ratios generally correlate with higher default rates. Observing where the LTV distribution changes can help in modeling risk and anticipating future defaults under different economic scenarios.
+6. Strategic Lending Decisions
+Lender Strategies: Lenders might use the LTV distribution data to tailor their products and strategies. For instance, offering more competitive rates or terms at just below the 80% LTV threshold to attract borrowers who can afford higher down payments, thus reducing the lender's risk.
+Conclusion
+The sharp change at an LTV of 80% in the cumulative distribution is a significant indicator of how borrowers and lenders behave around this critical financial threshold. Analyzing these patterns can provide insights into risk management, borrower equity, market conditions, and the impact of financial policies on lending practices.
+
+

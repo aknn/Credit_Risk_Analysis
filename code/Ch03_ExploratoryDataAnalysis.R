@@ -25,28 +25,34 @@ attach(mortgage)
 # *********************************************************************
 
 # Observed Frequencies and Empirical Distributions
+# Initialize vectors
 Frequency <- numeric()
-Percent   <- numeric()
+Percent <- numeric()
 Cum_Frequency <- numeric()
-Cum_Percent   <- numeric()
+Cum_Percent <- numeric()
 
-defaut_indicator <- unique(default_time)
-print(length(defaut_indicator))
-for(i in 1:3){
+total_rows <- nrow(mortgage)  # Total number of rows
+total_non_na <- sum(!is.na(mortgage$default_time))  # Total non-NA entries
+
+for(i in seq_along(defaut_indicator)){
   temp <- mortgage[mortgage$default_time == defaut_indicator[i],]
-  Frequency[i] <- length(temp$default_time)
-  Percent[i]   <- round(Frequency[i]/nrow(mortgage),4)  * 100               
+  Frequency[i] <- nrow(temp)
+  Percent[i] <- round((Frequency[i] / total_non_na) * 100, 2)  # Calculate based on non-NA only
+  
   if (i == 1){
     Cum_Frequency[i] <- Frequency[i]
-    Cum_Percent[i]   <- Percent[i]
-  }else{
-    Cum_Frequency[i] <- Frequency[i-1] + Frequency[i]
-    Cum_Percent[i]   <- Percent[i-1] + Percent[i]
+    Cum_Percent[i] <- Percent[i]
+  } else {
+    Cum_Frequency[i] <- Cum_Frequency[i-1] + Frequency[i]
+    Cum_Percent[i] <- Cum_Percent[i-1] + Percent[i]
   }
 }
 
-results <- cbind.data.frame(defaut_indicator,Frequency,Percent,Cum_Frequency,Cum_Percent)
-colnames(results) <- c("defaut_time","Frequency","Percent","Cum_Frequency","Cum_Percent")
+# Create the results data frame, handling NA in 'defaut_indicator' appropriately
+results <- data.frame(defaut_indicator = ifelse(is.na(defaut_indicator), "NA", as.character(defaut_indicator)),
+                      Frequency, Percent, Cum_Frequency, Cum_Percent)
+
+# Print results
 print(results)
 
 hist(FICO_orig_time, freq = FALSE, breaks = 100, 
@@ -66,9 +72,10 @@ plot.ecdf(LTV_orig_time, main = "Cum. Distr. of LTV at Orig",
 
 # Location Measures
 # Mode Function as R does not have one 
-get_mode <- function(x){
-  unique_x <- unique(x)
-  unique_x[which.max(tabulate(match(x, unique_x)))]}
+get_mode <- function(v) {
+  uniqv <- unique(na.omit(v))
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
 
 proc_means<- function(x){
   N      <- length(x)
@@ -84,7 +91,7 @@ proc_means<- function(x){
 var_names    <- c("default_time", "FICO_orig_time", "LTV_orig_time")
 loc_measures <- as.data.frame(matrix(NA, nrow = 6, ncol = 3))
 for (i in 1:3){
-  loc_measures[,i] <-(lapply(mortgage[var_names[i]], proc_means))
+  loc_measures[,i] <-unlist(lapply(mortgage[var_names[i]], proc_means))
 }
 print(loc_measures)
 
