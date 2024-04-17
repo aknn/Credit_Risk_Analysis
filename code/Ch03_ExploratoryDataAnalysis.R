@@ -76,30 +76,29 @@ get_mode <- function(v) {
   uniqv <- unique(na.omit(v))
   uniqv[which.max(tabulate(match(v, uniqv)))]
 }
-
-proc_means<- function(x){
-  N      <- length(x)
-  Mean   <- mean(x,   na.rm = TRUE)
+proc_means <- function(x) {
+  N <- length(na.omit(x))
+  Mean <- mean(x, na.rm = TRUE)
   Median <- median(x, na.rm = TRUE)
-  Mode   <- get_mode(x)
-  Pct001 <- quantile(x, 0.01)
-  Pct099 <- quantile(x, 0.99)
-  proc_means.results <- as.vector(round(cbind(N,Mean,Median,Mode,Pct001,Pct099),4))
-  }
-
-
-var_names    <- c("default_time", "FICO_orig_time", "LTV_orig_time")
-loc_measures <- as.data.frame(matrix(NA, nrow = 6, ncol = 3))
-for (i in 1:3){
-  loc_measures[,i] <-unlist(lapply(mortgage[var_names[i]], proc_means))
+  Mode <- get_mode(x)
+  Pct001 <- quantile(x, 0.01, na.rm = TRUE)
+  Pct099 <- quantile(x, 0.99, na.rm = TRUE)
+  return(c(N, Mean, Median, Mode, Pct001, Pct099))
 }
-print(loc_measures)
 
-loc_measures           <- as.data.frame(t(loc_measures),row.names = var_names)
-print(loc_measures)
-colnames(loc_measures) <- c("N","Mean","Median","Mode","Pct001","Pct099")
-print(loc_measures)
-loc_measures[,c(2,3,4,5,6)] <- round(loc_measures[,c(2,3,4,5,6)],2)
+library(dplyr)
+
+var_names <- c("default_time", "FICO_orig_time", "LTV_orig_time")
+loc_measures <- list()
+
+for (var_name in var_names) {
+  loc_measures[[var_name]] <- proc_means(mortgage[[var_name]])
+}
+
+loc_measures <- bind_rows(loc_measures, .id = "Variable") %>%
+  rename_with(~c("Variable", "N", "Mean", "Median", "Mode", "Pct001", "Pct099")) %>%
+  mutate(across(c(Mean, Median, Mode, Pct001, Pct099), round, 2))
+
 print(loc_measures)
 
 # Generate a Q-Q plot
@@ -117,77 +116,49 @@ qqline(mortgage$LTV_orig_time)
 
 
 # Dispersion measures
-proc_means_ext<- function(x){
-  N         <- length(x)
-  Minimum   <- min(x,   na.rm = TRUE)
-  Maximum   <- max(x, na.rm = TRUE)
-  Range     <- range(x)[2]-range(x)[1]
-  QuantileRange <- quantile(x, 0.75)-quantile(x, 0.25)
-  Var       <- var(x, na.rm = TRUE)
-  SD        <- sqrt(Var)
-  CoeffVar  <- SD/mean(x,   na.rm = TRUE) *100
-  return(as.vector(round(cbind( N,Minimum,Maximum,Range,QuantileRange,Var,SD,CoeffVar),4)))
+proc_means_ext <- function(x) {
+  N <- length(na.omit(x))
+  Minimum <- min(x, na.rm = TRUE)
+  Maximum <- max(x, na.rm = TRUE)
+  Range <- diff(range(x, na.rm = TRUE))
+  QuantileRange <- diff(quantile(x, c(0.25, 0.75), na.rm = TRUE))
+  Var <- var(x, na.rm = TRUE)
+  SD <- sqrt(Var)
+  CoeffVar <- SD / mean(x, na.rm = TRUE) * 100
+  # Return a named vector
+  return(c(N = N, Min = Minimum, Max = Maximum, Range = Range, 
+           QuantRange = QuantileRange, Var = Var, SD = SD, CoeffVar = CoeffVar))
 }
 
-
-var_names     <- c("default_time", "FICO_orig_time", "LTV_orig_time")
-disp_measures <- as.data.frame(matrix(NA, nrow = 8, ncol = 3))
-for (i in 1:3){
-  disp_measures[,i] <-(lapply(mortgage[var_names[i]], proc_means_ext))
-}
-
-disp_measures <- as.data.frame(t(disp_measures),row.names = var_names)
-colnames(disp_measures) <- 
-  c("N","Min","Max","Range","QuantRange","Var","SD","CoeffVar")
-print(round(disp_measures,2))
-
-# Skewness and Kurtosis
-proc_means_SkewKurt<- function(x){
-  N          <- length(x)
-  Skewness   <- skewness(x,   na.rm = TRUE)
-  Kurtosis   <- kurtosis(x, na.rm = TRUE) - 3
-  return(as.vector(round(cbind( N,Skewness, Kurtosis),4)))
-}
+library(dplyr)
 
 var_names <- c("default_time", "FICO_orig_time", "LTV_orig_time")
-SkewKurt_measures <- as.data.frame(matrix(NA, nrow = 3, ncol = 3))
-for (i in 1:3){
-  SkewKurt_measures[,i] <-(lapply(mortgage[var_names[i]], proc_means_SkewKurt))
+disp_measures <- list()
+
+# Loop over each variable name and apply the dispersion measure function
+for (var_name in var_names) {
+  disp_measures[[var_name]] <- proc_means_ext(mortgage[[var_name]])
 }
 
-SkewKurt_measures           <- as.data.frame(t(SkewKurt_measures),row.names = var_names)
-print(SkewKurt_measures)
-colnames(SkewKurt_measures) <- c("N","Skew", "Kurtosis")
-print(SkewKurt_measures)
+# Convert the list to a data frame
+disp_measures_df <- bind_rows(disp_measures, .id = "Variable")
+
+# Print the data frame
+print(disp_measures_df)
+
 
 # *********************************************************************
 # TWO DIMENSIONAL DATA ANALYSIS
 # *********************************************************************
 
 # Joint Empirical Distributions
-# We create a two-dimensional ferquency table
-FICO_orig_time_factor   <- mortgage$FICO_orig_time
-FICO_orig_time_factor[
-  FICO_orig_time_factor < quantile(mortgage$FICO_orig_time,.2)
-  ] <- 0
-FICO_orig_time_factor[
-  (FICO_orig_time_factor>= quantile(mortgage$FICO_orig_time,.2))
-& 
-  (FICO_orig_time_factor < quantile(mortgage$FICO_orig_time,.4))
-  ] <- 1
-FICO_orig_time_factor[
-  (FICO_orig_time_factor >= quantile(mortgage$FICO_orig_time,.4))
-  & 
-    (FICO_orig_time_factor < quantile(mortgage$FICO_orig_time,.6))
-  ] <- 2
-FICO_orig_time_factor[
-  (FICO_orig_time_factor>= quantile(mortgage$FICO_orig_time,.6))
-  & 
-    (FICO_orig_time_factor < quantile(mortgage$FICO_orig_time,.8))
-  ] <- 3
-FICO_orig_time_factor[
-  FICO_orig_time_factor  >= quantile(mortgage$FICO_orig_time,.8)
-  ] <- 4
+# We create a two-dimensional frequency table
+# Creating a factor variable with 5 levels based on quantiles
+quantiles <- quantile(mortgage$FICO_orig_time, probs = seq(0, 1, by = 0.2), na.rm = TRUE)
+FICO_orig_time_factor <- cut(mortgage$FICO_orig_time, breaks = quantiles, include.lowest = TRUE, labels = FALSE)
+
+# Checking the result
+table(FICO_orig_time_factor)  # This will show the distribution across the created categories
 
 # crosstable object is in the library "gmodels"
 CrossTable(mortgage$default_time, FICO_orig_time_factor, 
